@@ -12,10 +12,10 @@ use App\Http\Controllers\Pos\PurchaseController;
 use App\Http\Controllers\Pos\DefaultController;
 use App\Http\Controllers\Pos\InvoiceController;
 use App\Http\Controllers\Pos\StockController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [AuthenticatedSessionController::class, 'create'])
+                ->name('login');
 
 
 Route::controller(DemoController::class)->group(function () {
@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function (){
 
  // Admin All Route
 Route::controller(AdminController::class)->group(function () {
+    Route::get('/dashboard', 'index')->middleware(['auth'])->name('admin.index');
     Route::get('/admin/logout', 'destroy')->name('admin.logout');
     Route::get('/admin/profile', 'Profile')->name('admin.profile');
     Route::get('/edit/profile', 'EditProfile')->name('edit.profile');
@@ -159,11 +160,11 @@ Route::controller(DefaultController::class)->group(function () {
 
 
 
-
+/*
 Route::get('/dashboard', function () {
     return view('admin.index');
 })->middleware(['auth'])->name('dashboard');
-
+*/
 require __DIR__.'/auth.php';
 
 

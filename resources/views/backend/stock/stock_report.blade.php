@@ -33,16 +33,11 @@
                                 <tr>
                                     <th>Sl</th>
                                     <th>Supplier Name </th>
-                                    <th>Unit</th>
-                                    <th>Category</th>
                                     <th>Product Name</th>
-                                    <th>In Qty</th>
-                                    <th>Out Qty</th>
-                                    <th>Stock</th>
-
+                                    <th>Purchase Qty</th>
+                                    <th>Selling Qty</th>
+                                    <th>Stock Qty</th>
                                 </thead>
-
-
                                 <tbody>
 
                                 @foreach($allData as $key => $item)
@@ -54,9 +49,8 @@
 
                                     <tr>
                                         <td> {{ $key+1}} </td>
-                                        <td> {{ $item['supplier']['name'] }} </td>
-                                        <td> {{ $item['unit']['name'] }} </td>
-                                        <td> {{ $item['category']['name'] }} </td>
+                                        <td> {{ $item->suppliername}} </td>
+                                        <td> {{ $item->productname }} </td>
                                         <td> <span class="btn btn-success"> {{ $buying_total }} </span> </td>
                                         <td > <span class="btn btn-info"> {{ $selling_total }} </span> </td>
                                         <td> <span class="btn btn-danger">{{ $item->quantity }}</span> </td>

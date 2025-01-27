@@ -9,13 +9,16 @@ use App\Models\Category;
 use App\Models\Supplier;
 use App\Models\Unit;
 use Auth;
+use DB;
 use Illuminate\Support\Carbon;
 use League\Flysystem\UnixVisibility\PortableVisibilityConverter;
 
 class StockController extends Controller
 {
    public function StockReport(){
-       $allData = Product::orderBy('supplier_id', 'asc')->orderBy('category_id', 'asc')->get();
+       //$allData = Product::orderBy('supplier_id', 'asc')->orderBy('category_id', 'asc')->get();
+       $allData = DB::select('SELECT c.category_id,c.product_id,s.NAME as suppliername, p.NAME as productname,p.quantity,c.buying_qty FROM suppliers s LEFT JOIN products p ON p.supplier_id=s.id left JOIN purchases c ON c.product_id=p.id');
+       //$allData = json_decode($allData,true);
        return view('backend.stock.stock_report', compact('allData'));
    } // End Method
     public function StockReportPdf(){

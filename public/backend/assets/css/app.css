@@ -205,7 +205,7 @@ File: Main Css File
 }
 
 body[data-topbar=dark] #page-topbar {
-  background-color: #252b3b;
+  background-color: #37517e;
 }
 body[data-topbar=dark] .navbar-header .dropdown .show.header-item {
   background-color: rgba(255, 255, 255, 0.05);
