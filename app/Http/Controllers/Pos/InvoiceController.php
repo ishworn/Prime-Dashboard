@@ -27,7 +27,7 @@ class InvoiceController extends Controller
     } // End Invoice All Method
 
     public function invoiceAdd(){
-        $category = Category::all();
+      
         $customer = Customer::all();
         $invoice_data = Invoice::orderBy('id','desc')->first();
         if ($invoice_data == null) {
@@ -38,7 +38,7 @@ class InvoiceController extends Controller
             $invoice_no = $invoice_data+1;
         }
         $date = date('Y-m-d');
-        return view('backend.invoice.invoice_add',compact('invoice_no','category','date','customer'));
+        return view('backend.invoice.invoice_add',);
     } // End Method
     public function InvoiceStore(Request $request){
         if ($request->category_id == null) {
@@ -156,16 +156,8 @@ public function InvoiceApprove($id){
 
         foreach ($request->selling_qty as $key => $val) {
             $invoice_details = InvoiceDetail::where('id', $key)->first();
-            $product = Product::where('id', $invoice_details->product_id)->first();
-            if ($product->quantity < $request->selling_qty[$key]) {
-
-                $notification = array(
-                    'message' => 'Sorry you approve Maximum Value',
-                    'alert-type' => 'error'
-                );
-                return redirect()->back()->with($notification);
-
-            }
+           
+    
         } // End foreach
         $invoice = Invoice::findOrFail($id);
         $invoice->updated_by = Auth::user()->id;
@@ -176,9 +168,8 @@ public function InvoiceApprove($id){
                 $invoice_details = InvoiceDetail::where('id',$key)->first();
                 $invoice_details->status = '1';
                 $invoice_details->save();
-                $product = Product::where('id',$invoice_details->product_id)->first();
-                $product->quantity = ((float)$product->quantity) - ((float)$request->selling_qty[$key]);
-                $product->save();
+               
+                
             } // end foreach
 
             $invoice->save();

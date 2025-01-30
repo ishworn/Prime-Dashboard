@@ -6,7 +6,7 @@
                             </div>
                             <div class="col-sm-6">
                                 <div class="text-sm-end d-none d-sm-block">
-                                    Powered By <i class="mdi mdi-heart text-danger"></i> Edit Enterprises Pvt. Ltd.
+                                    Powered By <i class="mdi mdi-heart text-danger"></i>Prime Gurkha
                                 </div>
                             </div>
                         </div>

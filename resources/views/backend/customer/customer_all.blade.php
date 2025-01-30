@@ -32,24 +32,30 @@
                         <thead>
                         <tr>
                             <th>Sl</th>
-                            <th>Name</th> 
-                            <th>Customer Image </th>
-                            <th>Email</th>
-                            <th>Address</th> 
+                            <th> Sender  Name</th> 
+                            <th>Sender Phone</th>
+                            <th>Sender Email</th>
+                            <th>Sender   Address</th> 
                             <th>Action</th>
                             
                         </thead>
 
 
+
+
+
+
+
+
                         <tbody>
                         	 
-                        	@foreach($customers as $key => $item)
+                        	@foreach($senders as $key => $item)
                         <tr>
-                            <td> {{ $key+1}} </td>
-                            <td> {{ $item->name }} </td> 
-           <td> <img src="{{ asset( $item->customer_image ) }}" style="width:60px; height:50px"> </td> 
-                              <td> {{ $item->email }} </td> 
-                               <td> {{ $item->address }} </td> 
+                        <td>{{ $key + 1 }}</td>
+                            <td> {{ $item->senderName }} </td> 
+                            <td> {{ $item->senderPhone }} </td> 
+                              <td> {{ $item->senderEmail }} </td> 
+                               <td> {{ $item->senderAddress }} </td> 
                             <td>
    <a href="{{ route('customer.edit',$item->id) }}" class="btn btn-info sm" title="Edit Data">  <i class="fas fa-edit"></i> </a>
 

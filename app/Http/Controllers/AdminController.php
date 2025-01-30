@@ -6,19 +6,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Customer;
-use App\Models\Supplier;
+
 use App\Models\InvoiceDetail;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
 {
     public function index(){
-        $customer = Customer::get()->count();
-        $supplier = Supplier::get()->count();
-        $order = InvoiceDetail::where('status','=',0)->get()->count();
-        $sale = InvoiceDetail::where('status','=',1)->get()->count();
+      
 
-        return view('admin.index',compact('customer','supplier','order','sale'));
+        return view('admin.index',);
     }
     
     public function destroy(Request $request)
