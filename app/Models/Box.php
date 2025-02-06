@@ -25,11 +25,6 @@ class Box extends Model
         return $this->belongsTo(Sender::class);
     }
 
-
     // Define relationship with items
-    public function items()
-    {
-        return $this->hasMany(Item::class, );
-    }
    
 }
