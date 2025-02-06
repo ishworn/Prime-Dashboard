@@ -33,6 +33,8 @@
                         <tr>
                             <th>Sl</th>
                             <th> Sender  Name</th> 
+                            <th>Invoice Id</th>
+
                             <th>Sender Phone</th>
                             <th>Sender Email</th>
                             <th>Sender   Address</th> 
@@ -53,13 +55,19 @@
                         <tr>
                         <td>{{ $key + 1 }}</td>
                             <td> {{ $item->senderName }} </td> 
+                            <td> {{ $item->invoiceId }} </td> 
+
                             <td> {{ $item->senderPhone }} </td> 
                               <td> {{ $item->senderEmail }} </td> 
                                <td> {{ $item->senderAddress }} </td> 
                             <td>
    <a href="{{ route('customer.edit',$item->id) }}" class="btn btn-info sm" title="Edit Data">  <i class="fas fa-edit"></i> </a>
+   
 
      <a href="{{ route('customer.delete',$item->id) }}" class="btn btn-danger sm" title="Delete Data" id="delete">  <i class="fas fa-trash-alt"></i> </a>
+     
+     <a href="{{ route('customer.preview',$item->id) }}" class="btn btn-dark btn-rounded waves-effect waves-light" > <i class="fas fa-eye"></i></a>
+   
 
                             </td>
                            

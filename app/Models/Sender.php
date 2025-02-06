@@ -26,4 +26,7 @@ class Sender extends Model
     public function receiver() {
         return $this->hasOne(Receiver::class);
     }
+    public function shipment() {
+        return $this->hasOne(Shipment::class);
+    }
 }
