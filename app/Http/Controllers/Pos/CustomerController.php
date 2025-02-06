@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Pos;
 
 use App\Http\Controllers\Controller;
+ use Maatwebsite\Excel\Facades\Excel;
+
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use Auth;
@@ -14,6 +16,7 @@ use App\Models\Sender;
 use App\Models\Receiver;
 use App\Models\Box;
 use App\Models\Shipment;
+use App\Exports\ExcelExport;
 
 class CustomerController extends Controller
 {
@@ -28,7 +31,35 @@ class CustomerController extends Controller
 
 
 
+    public function CustomerShow($id)
+    {
+        $sender = Sender::with(['boxes.items'])->findOrFail($id);
+        // dd($sender->toArray()); 
 
+        $receivers = Receiver::where('sender_id', $id)->get();
+
+        $shipments = Shipment::where('sender_id', $id)->get();
+        $totalQuantity = 0;
+
+        foreach ($sender->boxes as $box) {
+            $totalQuantity += $box->items->sum('quantity');
+        }
+
+
+
+        // Assuming $sender is the sender object
+        $grandTotal = 0;
+
+        foreach ($sender->boxes as $box) {
+            $grandTotal += $box->items->sum('amount');
+        }
+
+        // $grandTotalInWords = NumberToWords::convert($grandTotal);
+
+
+
+        return view('backend.customer.customer_preview', compact('sender', 'receivers', 'shipments', 'totalQuantity', 'grandTotal',));
+    }
 
 
 
@@ -50,9 +81,9 @@ class CustomerController extends Controller
     public function CustomerEdit($id)
     {
 
-        $customer = Customer::findOrFail($id);
-        return view('backend.customer.customer_edit', compact('customer'));
-    } // End Method
+        $sender = Sender::findOrFail($id);
+        return view('backend.customer.customer_edit', compact('sender'));
+    }  // End Method
 
 
     public function CustomerUpdate(Request $request)
@@ -209,55 +240,89 @@ class CustomerController extends Controller
 
 
 
-    public function CustomerStored(Request $request)
+
+
+
+
+    
+    public function CustomerStore(Request $request)
     {
-       
-        // dd($request->all());
+        $validated = $request->validate([
+
+            'boxes' => 'required|array', // Expecting an array of boxes
+        ]);
+
 
         try {
-            // Store sender details
-            $sender =  Sender::create([
+
+
+
+
+            // Step 1: Split the form data for sender, receiver, and shipment
+            $senderData = [
                 'senderName' => $request->senderName,
                 'senderPhone' => $request->senderPhone,
                 'senderEmail' => $request->senderEmail,
                 'senderAddress' => $request->senderAddress,
+            ];
 
-            ]);
-            $sender_id = $sender->id;
-
-
-            Receiver::create([
-                'sender_id' => $sender_id,
+            $receiverData = [
                 'receiverName' => $request->receiverName,
                 'receiverPhone' => $request->receiverPhone,
                 'receiverEmail' => $request->receiverEmail,
                 'receiverAddress' => $request->receiverAddress,
                 'receiverPostalcode' => $request->receiverPostalcode, // Accessing receiver postal code
                 'receiverCountry' => $request->receiverCountry,
+            ];
 
-            ]);
-            
-            Shipment::create([
-                'senders_id' => $sender_id,
+            $shipmentData = [
                 'shipment_via' => $request->shipment_via,
                 'actual_weight' => $request->actual_weight,
                 'invoice_date' => $request->invoice_date,
                 'dimension' => $request->dimension,
+            ];
+            // Step 2: Insert sender data into the 'senders' table
+            $sender = Sender::create($senderData);
+            // Retrieve the sender_id
+            $sender_id = $sender->id;
+            // Step 3: Insert into 'receiver' and 'shipment' tables using sender_id
+            $receiverData['sender_id'] = $sender_id;
+            // dd($receiverData);
+            Receiver::create($receiverData);
+            $shipmentData['sender_id'] = $sender_id;
+            Shipment::create($shipmentData);
+            try {
+                foreach ($validated['boxes'] as $index => $boxData) {
+                    // Create Box and assign the sender_id to the box
+                    $box = Box::create([
+                        'sender_id' => $sender->id, // Using sender_id as the foreign key
+                        'box_number' => 'Box' . ($index + 1), // Box number (e.g., Box 1, Box 2)
+                    ]);
+                    // Save items for the current box
+                    foreach ($boxData['items'] as $itemData) {
+                        Item::create([
+                            'box_id' => $box->id,  // Foreign key to Box table
+                            'sender_id' => $box->sender_id,
+                            'item' => $itemData['item'],
+                            'hs_code' => $itemData['hs_code'],
+                            'quantity' => $itemData['quantity'],
+                            'unit_rate' => $itemData['unit_rate'],
+                            'amount' => $itemData['amount'],
+                        ]);
+                    }
+                }
+            } catch (\Exception $e) {
+                dd($e->getMessage());
+            }
 
-            ]);
 
 
-            // foreach ($request->boxes as $boxData) {
-            //     // Create a new box and store it in the database
-            //     Box::create([
-            //         'sender_id' => $request->sender_id,
-            //         'box_number' => $boxData['box_number'],
-            //     ]);
-            // }
 
 
-            return redirect()->route('customer.all')->with('error', 'An error occurred while saving the data.');
+            // Redirect or return a success message
+            return redirect()->route('customer.all')->with('success', 'Data saved successfully.');
         } catch (\Exception $e) {
+            // Handle errors, if any
             return redirect()->route('customer.all')->with('error', 'An error occurred while saving the data.');
         }
     }
@@ -265,57 +330,58 @@ class CustomerController extends Controller
 
 
 
-    public function CustomerStore(Request $request)
-{
-    try {
-        // Step 1: Split the form data for sender, receiver, and shipment
-        $senderData = [
-            'senderName' => $request->senderName,
-            'senderPhone' => $request->senderPhone,
-            'senderEmail' => $request->senderEmail,
-            'senderAddress' => $request->senderAddress,
+    public function exportToExcel($id)
+    {
+        // Fetch data (same as CustomerShow)
+        $sender = Sender::with(['boxes.items'])->findOrFail($id);
+        $receivers = Receiver::where('sender_id', $id)->get();
+        $shipments = Shipment::where('sender_id', $id)->get();
+
+
+        // Prepare data for export
+        $data = [
+            'sender' => $sender,
+            'receivers' => $receivers,
+            'shipments' => $shipments,
         ];
 
-        $receiverData = [
-            'receiverName' => $request->receiverName,
-            'receiverPhone' => $request->receiverPhone,
-            'receiverEmail' => $request->receiverEmail,
-            'receiverAddress' => $request->receiverAddress,
-            'receiverPostalcode' => $request->receiverPostalcode, // Accessing receiver postal code
-            'receiverCountry' => $request->receiverCountry,
-        ];
-
-        $shipmentData = [
-            'shipment_via' => $request->shipment_via,
-            'actual_weight' => $request->actual_weight,
-            'invoice_date' => $request->invoice_date,
-            'dimension' => $request->dimension,
-        ];
-
-        // Step 2: Insert sender data into the 'senders' table
-        $sender = Sender::create($senderData);
-
-        // Retrieve the sender_id
-        $sender_id = $sender->id;   
-
-        // Step 3: Insert into 'receiver' and 'shipment' tables using sender_id
-        $receiverData['sender_id'] = $sender_id;
-        // dd($receiverData);
-        Receiver::create($receiverData);
-       
-
-        $shipmentData['senders_id'] = $sender_id;
-        
-
-        Shipment::create($shipmentData);
-        dd($shipmentData);
-
-        // Redirect or return a success message
-        return redirect()->route('customer.all')->with('success', 'Data saved successfully.');
-    } catch (\Exception $e) {
-        // Handle errors, if any
-        return redirect()->route('customer.all')->with('error', 'An error occurred while saving the data.');
+      
+        return Excel::download(new ExcelExport($sender, $shipments, $receivers, ), 'invoice.xlsx');
     }
-}
 
+
+
+
+    public function printInvoice($id)
+    {
+        $sender = Sender::with(['boxes.items'])->findOrFail($id);
+        $receivers = Receiver::where('sender_id', $id)->get();
+        $shipments = Shipment::where('sender_id', $id)->get();
+    
+        // Pass the data to the print view
+        return view('backend.customer.print', compact( 'sender', 'shipments', 'receivers'));
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
+
+    
 }

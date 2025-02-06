@@ -10,10 +10,10 @@ class Box extends Model
     use HasFactory;
     protected $table = 'boxes';
 
-    
+
 
     protected $fillable = [
-   
+
 'sender_id',
 'box_number',
 
@@ -26,5 +26,9 @@ class Box extends Model
     }
 
     // Define relationship with items
-   
+    public function items()
+    {
+        return $this->hasMany(Item::class, );
+    }
+
 }

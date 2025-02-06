@@ -47,26 +47,22 @@ Route::controller(AdminController::class)->group(function () {
 Route::controller(CustomerController::class)->group(function () {
     Route::get('/customer/all', 'CustomerAll')->name('customer.all');
     Route::get('/customer/add', 'CustomerAdd')->name('customer.add');
+    Route::get('/customer/preview/{id}', 'CustomerShow')->name('customer.preview');
+    Route::get('/customer/{id}/export-to-excel', 'exportToExcel')->name('export.excel');
+    // Route::get('/customer/{id}/export-to-excel', 'exportToExcel')->name('export.excel');
+  
+Route::get('/customer/print/{id}', 'printInvoice')->name('invoice.print');
     Route::post('/customer/store', 'CustomerStore')->name('customer.store');
     Route::get('/customer/edit/{id}', 'CustomerEdit')->name('customer.edit');
     Route::post('/customer/update', 'CustomerUpdate')->name('customer.update');
     Route::get('/customer/delete/{id}', 'CustomerDelete')->name('customer.delete');
 
-    Route::get('/credit/customer', 'CreditCustomer')->name('credit.customer');
-    Route::get('/credit/customer/print/pdf', 'CreditCustomerPrintPdf')->name('credit.customer.print.pdf');
-    Route::get('customer/edit/invoice/{invoice_id}', 'CustomerEditInvoice')->name('customer.edit.invoice');
-    Route::post('customer/update/invoice/{invoice_id}', 'CustomerUpdateInvoice')->name('customer.update.invoice');
-    Route::get('customer/invoice/details/{invoice_id}', 'CustomerInvoiceDetails')->name('customer.invoice.details.pdf');
-    Route::get('paid/customer', 'PaidCustomer')->name('paid.customer');
-    Route::get('paid/customer/print/pdf', 'PaidCustomerPrintPdf')->name('paid.customer.print.pdf');
-    Route::get('customer/wise/report', 'CustomerWiseReport')->name('customer.wise.report');
-    Route::get('customer/wise/credit/report', 'CustomerWiseCreditReport')->name('customer.wise.credit.report');
-    Route::get('customer/wise/paid/report', 'CustomerWisePaidreport')->name('customer.wise.paid.report');
-  
+   
+   
 
 
 
-Route::post('/add_customer', [CustomerController::class, 'store'])->name('add_customer.store');
+// Route::post('/add_customer', [CustomerController::class, 'store'])->name('add_customer.store');
 
 });
 
@@ -80,19 +76,7 @@ Route::post('/add_customer', [CustomerController::class, 'store'])->name('add_cu
 
 
 
-     Route::controller(InvoiceController::class)->group(function () {
-         Route::get('/invoice/all', 'InvoiceAll')->name('invoice.all');
-         Route::get('/invoice/add', 'InvoiceAdd')->name('invoice.add');
-         Route::post('/invoice/store', 'InvoiceStore')->name('invoice.store');
-         Route::get('/invoice/pending/list', 'PendingList')->name('invoice.pending.list');
-         Route::get('/invoice/delete/{id}', 'InvoiceDelete')->name('invoice.delete');
-         Route::get('/invoice/approve/{id}', 'InvoiceApprove')->name('invoice.approve');
-         Route::post('/approval/store/{id}', 'ApprovalStore')->name('approval.store');
-         Route::get('/print/invoice/list', 'PrintInvoiceList')->name('print.invoice.list');
-         Route::get('/print/invoice/{id}', 'PrintInvoice')->name('print.invoice');
-         Route::get('/daily/invoice/report', 'DailyInvoiceReport')->name('daily.invoice.report');
-         Route::get('/daily/invoice/pdf', 'DailyInvoicePdf')->name('daily.invoice.pdf');
-     });
+    
 
 
 });
